@@ -1,56 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Новая папка\**" />
-    <EmbeddedResource Remove="Новая папка\**" />
-    <None Remove="Новая папка\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="obj\Debug\net10.0-windows\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs" />
-    <Compile Include="obj\Debug\net10.0-windows\TicTacToe.UI.AssemblyInfo.cs" />
-    <Compile Include="obj\Debug\net10.0-windows\TicTacToe.UI.GlobalUsings.g.cs" />
-    <Compile Include="obj\Release\net10.0-windows\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs" />
-    <Compile Include="obj\Release\net10.0-windows\TicTacToe.UI.AssemblyInfo.cs" />
-    <Compile Include="obj\Release\net10.0-windows\TicTacToe.UI.GlobalUsings.g.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="obj\Debug\net10.0-windows\TicTacToe.UI.designer.deps.json" />
-    <Content Include="obj\Debug\net10.0-windows\TicTacToe.UI.designer.runtimeconfig.json" />
-    <Content Include="obj\project.assets.json" />
-    <Content Include="obj\TicTacToe.UI.csproj.nuget.dgspec.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="bin\Debug\net10.0-windows\" />
-    <Folder Include="bin\Release\net10.0-windows\" />
-    <Folder Include="obj\Debug\net10.0-windows\refint\" />
-    <Folder Include="obj\Debug\net10.0-windows\ref\" />
-    <Folder Include="obj\Release\net10.0-windows\refint\" />
-    <Folder Include="obj\Release\net10.0-windows\ref\" />
-    <Folder Include="Properties\PublishProfiles\" />
-    <Folder Include="Views\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="obj\Debug\net10.0-windows\TicTacToe.UI.AssemblyInfoInputs.cache" />
-    <None Include="obj\Debug\net10.0-windows\TicTacToe.UI.assets.cache" />
-    <None Include="obj\Debug\net10.0-windows\TicTacToe.UI.GeneratedMSBuildEditorConfig.editorconfig" />
-    <None Include="obj\project.nuget.cache" />
-    <None Include="obj\Release\net10.0-windows\TicTacToe.UI.AssemblyInfoInputs.cache" />
-    <None Include="obj\Release\net10.0-windows\TicTacToe.UI.assets.cache" />
-    <None Include="obj\Release\net10.0-windows\TicTacToe.UI.GeneratedMSBuildEditorConfig.editorconfig" />
-    <None Include="obj\TicTacToe.UI.csproj.nuget.g.props" />
-    <None Include="obj\TicTacToe.UI.csproj.nuget.g.targets" />
-  </ItemGroup>
-
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net10.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 </Project>
