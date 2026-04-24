@@ -6,5 +6,6 @@
         char CheckWinner();
         void ResetBoard();
         char[,] GetBoardState();
+        char[,] GetBoard();
     }
 }
