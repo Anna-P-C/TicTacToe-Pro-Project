@@ -37,7 +37,6 @@
             ClientSize = new Size(800, 450);
             Name = "LeaderboardForm";
             Text = "LeaderboardForm";
-            Load += LeaderboardForm_Load;
             ResumeLayout(false);
         }
 
