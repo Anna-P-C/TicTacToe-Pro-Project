@@ -29,24 +29,42 @@ namespace TicTacToe.UI
 
         private void OnButtonClick(object sender, EventArgs e)
         {
-            Button button = (Button)sender;
+            if (sender is not Button button) return;
+
             int row = int.Parse(button.Name.Substring(3, 1));
             int col = int.Parse(button.Name.Substring(4, 1));
 
-            if (_gameEngine.MakeMove(row, col, _currentPlayer.Symbol))
+            bool moveSuccess = _gameEngine.MakeMove(row, col, _currentPlayer.Symbol);
+
+            if (moveSuccess)
             {
                 button.Text = _currentPlayer.Symbol.ToString();
-                button.Enabled = false; 
+                button.Enabled = false;
 
-                char winner = _gameEngine.CheckWinner();
-                if (winner != '\0')
+                char winnerSymbol = _gameEngine.CheckWinner();
+
+                if (winnerSymbol != '\0')
                 {
-                    MessageBox.Show($"Переміг гравець: {winner}!");
+                    //Singleton ScoreService
+                    ScoreService.Instance.SaveScore(_currentPlayer);
+
+                    string message = $"Вітаємо! {(_currentPlayer.Symbol == 'X' ? "Хрестики" : "Нулики")} перемогли!\n" +
+                                     $"Результат збережено в рейтинг.";
+
+                    MessageBox.Show(message, "Кінець матчу", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     Application.Restart();
                 }
                 else
                 {
-                    _currentPlayer = (_currentPlayer == _player1) ? _player2 : _player1;
+                    
+                    if (_currentPlayer == _player1)
+                    {
+                        _currentPlayer = _player2;
+                    }
+                    else
+                    {
+                        _currentPlayer = _player1;
+                    }
                 }
             }
         }
