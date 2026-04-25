@@ -1,15 +1,27 @@
 ﻿using System.Text.Json;
 using TicTacToe.UI.Models;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace TicTacToe.UI.Services
 {
+    
     public class ScoreService
     {
         private static ScoreService? _instance;
         private static readonly object _lock = new object();
         private readonly string _filePath = "scores.json";
 
-        private ScoreService() { }
+        private ScoreService()
+        {
+          
+            if (!File.Exists(_filePath))
+            {
+                File.WriteAllText(_filePath, "[]");
+            }
+        }
 
         public static ScoreService Instance
         {
@@ -24,7 +36,8 @@ namespace TicTacToe.UI.Services
             }
         }
 
-        public List<Player> GetTopPlayers()
+       
+        public List<Player> GetPlayers()
         {
             if (!File.Exists(_filePath)) return new List<Player>();
 
@@ -33,29 +46,61 @@ namespace TicTacToe.UI.Services
                 string json = File.ReadAllText(_filePath);
                 return JsonSerializer.Deserialize<List<Player>>(json) ?? new List<Player>();
             }
-            catch
+            catch (Exception)
             {
+                
                 return new List<Player>();
             }
         }
 
-        public void SaveScore(Player player)
+        
+        public List<Player> GetTopPlayers(int count = 5)
         {
-            var players = GetTopPlayers();
+            return GetPlayers()
+                .OrderByDescending(p => p.Score)
+                .Take(count)
+                .ToList();
+        }
+
+       
+        public void SaveScore(Player player, int pointsEarned)
+        {
+            var players = GetPlayers();
             var existingPlayer = players.FirstOrDefault(p => p.Name == player.Name);
 
             if (existingPlayer != null)
             {
-                existingPlayer.Score += 1;
+                
+                existingPlayer.Score += pointsEarned;
+                existingPlayer.LastPlayed = DateTime.Now; 
             }
             else
             {
-                player.Score = 1;
+                player.Score = pointsEarned;
+                player.LastPlayed = DateTime.Now;
                 players.Add(player);
             }
 
-            string json = JsonSerializer.Serialize(players.OrderByDescending(p => p.Score).ToList());
-            File.WriteAllText(_filePath, json);
+            SaveToFile(players);
+        }
+
+        public void ClearAllScores()
+        {
+            SaveToFile(new List<Player>());
+        }
+
+        private void SaveToFile(List<Player> players)
+        {
+            try
+            {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(players.OrderByDescending(p => p.Score).ToList(), options);
+                File.WriteAllText(_filePath, json);
+            }
+            catch (Exception)
+            {
+               
+            }
         }
     }
 }

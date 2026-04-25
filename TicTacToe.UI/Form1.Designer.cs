@@ -130,9 +130,8 @@ namespace TicTacToe.UI
             lblTournamentInfo.AutoSize = true;
             lblTournamentInfo.Location = new Point(578, 73);
             lblTournamentInfo.Name = "lblTournamentInfo";
-            lblTournamentInfo.Size = new Size(50, 20);
+            lblTournamentInfo.Size = new Size(0, 20);
             lblTournamentInfo.TabIndex = 9;
-            lblTournamentInfo.Text = "label1";
             // 
             // pbProgress
             // 

@@ -1,7 +1,9 @@
 using System;
 using System.Drawing;
-using System.Reflection.Emit;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TicTacToe.UI.Core;
 using TicTacToe.UI.Models;
 using TicTacToe.UI.Services;
@@ -14,22 +16,30 @@ namespace TicTacToe.UI
         private Player _player1;
         private Player _player2;
         private Player _currentPlayer;
+        private string _playerName;
 
         private IMoveStrategy _botStrategy;
         private bool _isVsComputer = true;
         private readonly ILogger _logger = new FileLogger();
         private readonly TournamentManager _tournamentManager = new TournamentManager();
 
-        public Form1()
+        public Form1(string playerName)
         {
             InitializeComponent();
+            _playerName = playerName;
+
+           
+            this.Text = $"Гравець: {_playerName} | Рівень: 1";
 
             _gameEngine = new GameEngine();
-            _player1 = new Player("Гравець", 'X');
+            _player1 = new Player(_playerName, 'X'); 
             _player2 = new Player("Комп'ютер", 'O');
             _currentPlayer = _player1;
 
             _botStrategy = StrategyFactory.CreateStrategy(1);
+
+            
+            UpdateStatusLabel();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -63,16 +73,15 @@ namespace TicTacToe.UI
 
                 if (winnerSymbol != '\0')
                 {
-                    ScoreService.Instance.SaveScore(_currentPlayer);
-                    MessageBox.Show($"Переміг {_currentPlayer.Name}!", "Кінець", MessageBoxButtons.OK);
-                    Application.Restart();
+                    
+                    EndGame(winnerSymbol);
                     return false;
                 }
 
                 if (IsBoardFull())
                 {
-                    MessageBox.Show("Нічия!", "Кінець", MessageBoxButtons.OK);
-                    Application.Restart();
+                   
+                    EndGame('\0');
                     return false;
                 }
 
@@ -86,10 +95,7 @@ namespace TicTacToe.UI
         {
             try
             {
-
                 int currentLevel = _tournamentManager.CurrentRound;
-
-
                 _botStrategy = StrategyFactory.CreateStrategy(currentLevel);
 
                 _logger.LogInfo($"Бот використовує стратегію: {_botStrategy.GetStrategyName()}");
@@ -120,29 +126,42 @@ namespace TicTacToe.UI
             }
             return true;
         }
+
         private void EndGame(char winner)
         {
+          
+            if (winner == 'X') HighlightStatus(Color.Green);
+            else if (winner == 'O') HighlightStatus(Color.Red);
+
             _tournamentManager.RegisterWin(winner);
             _logger.LogInfo($"Кінець раунду. Переможець: {winner}. Поточні бали: {_tournamentManager.TotalScore}");
 
+           
+            UpdateStatusLabel();
+
             if (_tournamentManager.IsTournamentActive && winner == 'X')
             {
-                MessageBox.Show($"Вітаю! Ти пройшла рівень {_tournamentManager.GetCurrentDifficultyName()}! Наступний етап чекає.");
+                MessageBox.Show($"Вітаю! Ти пройшла рівень {_tournamentManager.CurrentRound - 1}! Наступний етап чекає.", "Раунд пройдено");
                 PrepareNextRound();
+                UpdateStatusLabel();
             }
             else
             {
-                string resultMsg = winner == 'X' ? "Ти стала чемпіоном!" : "Бот виявився сильнішим. Спробуй ще раз!";
-                MessageBox.Show($"{resultMsg}\nТвій фінальний рахунок: {_tournamentManager.TotalScore}");
-
+                string resultMsg = winner == 'X' ? "Ти стала чемпіоном!" : (winner == '\0' ? "Нічия!" : "Бот виявився сильнішим.");
+                MessageBox.Show($"{resultMsg}\nТвій фінальний рахунок: {_tournamentManager.TotalScore}", "Фінал турніру");
 
                 ShowSaveRecordWindow(_tournamentManager.TotalScore);
-                Application.Restart();
+
+                
+                this.Close();
             }
         }
+
         private void PrepareNextRound()
         {
             _gameEngine.ResetBoard();
+            _currentPlayer = _player1; 
+
             foreach (Control control in this.Controls)
             {
                 if (control is Button btn && btn.Name.StartsWith("btn"))
@@ -157,20 +176,47 @@ namespace TicTacToe.UI
 
         private void ShowSaveRecordWindow(int score)
         {
-
-            string playerName = "Гравець";
-            ScoreService.Instance.SaveScore(new Player(playerName, 'X'));
+            ScoreService.Instance.SaveScore(new Player(_playerName, 'X'), _tournamentManager.TotalScore);
             MessageBox.Show($"Ваш результат {score} збережено!");
         }
+
         private void UpdateStatusLabel()
         {
-
+           
             lblTournamentInfo.Text = $"Раунд: {_tournamentManager.CurrentRound} | Бали: {_tournamentManager.TotalScore}";
 
-            
-            pbProgress.Value = (_tournamentManager.CurrentRound - 1) * 33 + 10;
+            this.Text = $"Гравець: {_playerName} | Раунд: {_tournamentManager.CurrentRound}";
 
-            _logger.LogInfo($"Інтерфейс оновлено: Раунд {_tournamentManager.CurrentRound}");
+          
+            int progress = (_tournamentManager.CurrentRound - 1) * 33;
+            if (!_tournamentManager.IsTournamentActive && _tournamentManager.TotalScore > 0) progress = 100;
+
+            pbProgress.Value = Math.Min(progress, 100);
+
+            _logger.LogInfo($"Оновлено UI. Поточний прогрес турніру: {progress}%");
+        }
+
+        private async void HighlightStatus(Color highlightColor)
+        {
+            try
+            {
+                Color originalColor = lblTournamentInfo.ForeColor;
+                lblTournamentInfo.ForeColor = highlightColor;
+
+                _logger.LogInfo($"Візуальний ефект: зміна кольору на {highlightColor.Name}");
+
+                await Task.Delay(1500);
+
+                
+                if (!lblTournamentInfo.IsDisposed)
+                {
+                    lblTournamentInfo.ForeColor = originalColor;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Помилка при виконанні ефекту підсвічування", ex);
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     public class Player
     {
+        public DateTime LastPlayed { get; set; } = DateTime.Now;
         public string Name { get; set; }
         public char Symbol { get; set; }
         public int Score { get; set; }
