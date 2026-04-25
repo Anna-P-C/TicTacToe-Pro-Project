@@ -2,24 +2,17 @@
 
 namespace TicTacToe.UI.Services
 {
-   
-    /// Патерн Factory Method.
-    
     public static class StrategyFactory
     {
-        public static IMoveStrategy CreateStrategy(string type)
+        public static IMoveStrategy CreateStrategy(int level)
         {
-         
-            switch (type.ToLower())
+            return level switch
             {
-                case "ai":
-                case "expert":
-                    return new MinimaxStrategy();
-
-                
-                default:
-                    return new MinimaxStrategy();
-            }
+                1 => new EasyStrategy(),
+                2 => new MediumStrategy(),
+                3 => new MinimaxStrategy(),
+                _ => new EasyStrategy()
+            };
         }
     }
 }

@@ -40,6 +40,8 @@ namespace TicTacToe.UI
             btn21 = new Button();
             btn22 = new Button();
             btn12 = new Button();
+            lblTournamentInfo = new Label();
+            pbProgress = new ProgressBar();
             SuspendLayout();
             // 
             // btn00
@@ -53,7 +55,7 @@ namespace TicTacToe.UI
             // 
             // btn01
             // 
-            btn01.Location = new Point(307, 43);
+            btn01.Location = new Point(248, 43);
             btn01.Name = "btn01";
             btn01.Size = new Size(75, 75);
             btn01.TabIndex = 1;
@@ -62,7 +64,7 @@ namespace TicTacToe.UI
             // 
             // btn02
             // 
-            btn02.Location = new Point(540, 43);
+            btn02.Location = new Point(414, 43);
             btn02.Name = "btn02";
             btn02.Size = new Size(75, 75);
             btn02.TabIndex = 2;
@@ -71,7 +73,7 @@ namespace TicTacToe.UI
             // 
             // btn10
             // 
-            btn10.Location = new Point(61, 199);
+            btn10.Location = new Point(61, 187);
             btn10.Name = "btn10";
             btn10.Size = new Size(75, 75);
             btn10.TabIndex = 3;
@@ -80,7 +82,7 @@ namespace TicTacToe.UI
             // 
             // btn11
             // 
-            btn11.Location = new Point(307, 199);
+            btn11.Location = new Point(248, 187);
             btn11.Name = "btn11";
             btn11.Size = new Size(75, 75);
             btn11.TabIndex = 4;
@@ -89,7 +91,7 @@ namespace TicTacToe.UI
             // 
             // btn20
             // 
-            btn20.Location = new Point(61, 375);
+            btn20.Location = new Point(61, 319);
             btn20.Name = "btn20";
             btn20.Size = new Size(75, 75);
             btn20.TabIndex = 5;
@@ -98,7 +100,7 @@ namespace TicTacToe.UI
             // 
             // btn21
             // 
-            btn21.Location = new Point(307, 375);
+            btn21.Location = new Point(248, 319);
             btn21.Name = "btn21";
             btn21.Size = new Size(75, 75);
             btn21.TabIndex = 6;
@@ -107,7 +109,7 @@ namespace TicTacToe.UI
             // 
             // btn22
             // 
-            btn22.Location = new Point(540, 375);
+            btn22.Location = new Point(414, 333);
             btn22.Name = "btn22";
             btn22.Size = new Size(75, 75);
             btn22.TabIndex = 7;
@@ -116,18 +118,36 @@ namespace TicTacToe.UI
             // 
             // btn12
             // 
-            btn12.Location = new Point(540, 199);
+            btn12.Location = new Point(414, 187);
             btn12.Name = "btn12";
             btn12.Size = new Size(75, 75);
             btn12.TabIndex = 8;
             btn12.UseVisualStyleBackColor = true;
             btn12.Click += OnButtonClick;
             // 
+            // lblTournamentInfo
+            // 
+            lblTournamentInfo.AutoSize = true;
+            lblTournamentInfo.Location = new Point(578, 73);
+            lblTournamentInfo.Name = "lblTournamentInfo";
+            lblTournamentInfo.Size = new Size(50, 20);
+            lblTournamentInfo.TabIndex = 9;
+            lblTournamentInfo.Text = "label1";
+            // 
+            // pbProgress
+            // 
+            pbProgress.Location = new Point(568, 141);
+            pbProgress.Name = "pbProgress";
+            pbProgress.Size = new Size(125, 29);
+            pbProgress.TabIndex = 10;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(707, 532);
+            Controls.Add(pbProgress);
+            Controls.Add(lblTournamentInfo);
             Controls.Add(btn12);
             Controls.Add(btn22);
             Controls.Add(btn21);
@@ -141,6 +161,7 @@ namespace TicTacToe.UI
             Text = "Form1";
             Load += Form1_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -154,5 +175,7 @@ namespace TicTacToe.UI
         private Button btn21;
         private Button btn22;
         private Button btn12;
+        private Label lblTournamentInfo;
+        private ProgressBar pbProgress;
     }
 }
