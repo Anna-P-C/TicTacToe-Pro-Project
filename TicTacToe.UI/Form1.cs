@@ -17,33 +17,38 @@ namespace TicTacToe.UI
         private Player _player2;
         private Player _currentPlayer;
         private string _playerName;
+        private int _movesCounter = 0;
 
         private IMoveStrategy _botStrategy;
         private bool _isVsComputer = true;
         private readonly ILogger _logger = new FileLogger();
         private readonly TournamentManager _tournamentManager = new TournamentManager();
+        private readonly CommandHistory _history = new CommandHistory();
 
         public Form1(string playerName)
         {
             InitializeComponent();
             _playerName = playerName;
-
-           
-            this.Text = $"Гравець: {_playerName} | Рівень: 1";
+            this.Text = $"TicTacToe - {_playerName}";
 
             _gameEngine = new GameEngine();
-            _player1 = new Player(_playerName, 'X'); 
+            _player1 = new Player(_playerName, 'X');
             _player2 = new Player("Комп'ютер", 'O');
             _currentPlayer = _player1;
 
             _botStrategy = StrategyFactory.CreateStrategy(1);
 
-            
+            // СТАРТ АНАЛІТИКИ: Починаємо відлік часу гри
+            AnalyticsService.Instance.StartRoundTimer();
+
             UpdateStatusLabel();
+            RefreshUndoRedoButtons();
         }
 
+        // Цей метод виправляє помилку CS0103 у Designer.cs
         private void Form1_Load(object sender, EventArgs e)
         {
+            _logger.LogInfo("Форма гри успішно завантажена.");
         }
 
         private void OnButtonClick(object sender, EventArgs e)
@@ -66,22 +71,28 @@ namespace TicTacToe.UI
 
             if (_gameEngine.MakeMove(row, col, _currentPlayer.Symbol))
             {
+                _history.PushMove(_gameEngine.GetBoard(), row, col, _currentPlayer.Symbol);
+
+                // РЕЄСТРУЄМО ХІД В АНАЛІТИЦІ
+                AnalyticsService.Instance.RegisterMove();
+
+                if (_currentPlayer == _player1) _movesCounter++;
+
                 button.Text = _currentPlayer.Symbol.ToString();
                 button.Enabled = false;
 
                 char winnerSymbol = _gameEngine.CheckWinner();
+                RefreshUndoRedoButtons();
 
                 if (winnerSymbol != '\0')
                 {
-                    
-                    EndGame(winnerSymbol);
+                    _ = EndGame(winnerSymbol);
                     return false;
                 }
 
                 if (IsBoardFull())
                 {
-                   
-                    EndGame('\0');
+                    _ = EndGame('\0');
                     return false;
                 }
 
@@ -97,126 +108,147 @@ namespace TicTacToe.UI
             {
                 int currentLevel = _tournamentManager.CurrentRound;
                 _botStrategy = StrategyFactory.CreateStrategy(currentLevel);
-
-                _logger.LogInfo($"Бот використовує стратегію: {_botStrategy.GetStrategyName()}");
-
                 var move = _botStrategy.GetNextMove(_gameEngine.GetBoard(), _player2.Symbol);
-
                 string btnName = $"btn{move.row}{move.col}";
                 Control[] controls = this.Controls.Find(btnName, true);
 
                 if (controls.Length > 0 && controls[0] is Button botButton)
                 {
                     HandleMove(botButton);
-                    _logger.LogMove("Комп'ютер", move.row, move.col);
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError("Помилка під час ходу бота", ex);
-            }
+            catch (Exception ex) { _logger.LogError("Бот помилився", ex); }
         }
 
-        private bool IsBoardFull()
+        private async Task EndGame(char winner)
         {
-            var board = _gameEngine.GetBoard();
-            foreach (var cell in board)
+            if (winner == 'X')
             {
-                if (cell == '\0') return false;
+                HighlightStatus(Color.Green);
+                await FlashGameBoard(Color.LimeGreen);
+                AchievementManager.Instance.CheckFastWin(_movesCounter);
+                AchievementManager.Instance.CheckCorners(_gameEngine.GetBoard(), 'X');
             }
-            return true;
-        }
+            else if (winner == 'O')
+            {
+                HighlightStatus(Color.Red);
+                await FlashGameBoard(Color.Tomato);
+            }
 
-        private void EndGame(char winner)
-        {
-          
-            if (winner == 'X') HighlightStatus(Color.Green);
-            else if (winner == 'O') HighlightStatus(Color.Red);
+            // ЗБЕРІГАЄМО ДАНІ АНАЛІТИКИ ТА ГЕНЕРУЄМО ЗВІТ
+            AnalyticsService.Instance.SaveSession(_playerName, _tournamentManager.TotalScore / 100, 0, _movesCounter);
+            string advice = AnalyticsService.Instance.GetPerformanceAdvice(_tournamentManager.TotalScore / 100, 0);
 
+            _movesCounter = 0;
+            _history.Clear();
             _tournamentManager.RegisterWin(winner);
-            _logger.LogInfo($"Кінець раунду. Переможець: {winner}. Поточні бали: {_tournamentManager.TotalScore}");
-
-           
             UpdateStatusLabel();
 
             if (_tournamentManager.IsTournamentActive && winner == 'X')
             {
-                MessageBox.Show($"Вітаю! Ти пройшла рівень {_tournamentManager.CurrentRound - 1}! Наступний етап чекає.", "Раунд пройдено");
+                MessageBox.Show($"{GetRoundTitle()} пройдено!\n\nПорада: {advice}");
                 PrepareNextRound();
-                UpdateStatusLabel();
+                AnalyticsService.Instance.StartRoundTimer(); // Скидаємо таймер для нового раунду
             }
             else
             {
-                string resultMsg = winner == 'X' ? "Ти стала чемпіоном!" : (winner == '\0' ? "Нічия!" : "Бот виявився сильнішим.");
-                MessageBox.Show($"{resultMsg}\nТвій фінальний рахунок: {_tournamentManager.TotalScore}", "Фінал турніру");
-
-                ShowSaveRecordWindow(_tournamentManager.TotalScore);
-
-                
+                MessageBox.Show($"Гра завершена!\n\n{advice}");
+                ScoreService.Instance.SaveScore(new Player(_playerName, 'X'), _tournamentManager.TotalScore);
                 this.Close();
             }
         }
 
-        private void PrepareNextRound()
+        private void btnUndo_Click_1(object sender, EventArgs e)
         {
-            _gameEngine.ResetBoard();
-            _currentPlayer = _player1; 
-
-            foreach (Control control in this.Controls)
+            try
             {
-                if (control is Button btn && btn.Name.StartsWith("btn"))
-                {
-                    btn.Text = "";
-                    btn.Enabled = true;
-                    btn.BackColor = Color.White;
-                }
+                var botMove = _history.Undo();
+                if (botMove != null) ApplyUndoToUI(botMove);
+
+                var playerMove = _history.Undo();
+                if (playerMove != null) ApplyUndoToUI(playerMove);
+
+                _gameEngine.SetBoard(GetCurrentBoardFromUI());
+                if (_movesCounter > 0) _movesCounter--;
+                RefreshUndoRedoButtons();
             }
-            _logger.LogInfo($"Підготовка до раунду {_tournamentManager.CurrentRound}");
+            catch { }
         }
 
-        private void ShowSaveRecordWindow(int score)
+        private void btnRedo_Click(object sender, EventArgs e)
         {
-            ScoreService.Instance.SaveScore(new Player(_playerName, 'X'), _tournamentManager.TotalScore);
-            MessageBox.Show($"Ваш результат {score} збережено!");
+            var playerMove = _history.Redo();
+            if (playerMove != null)
+            {
+                ApplyRedoToUI(playerMove);
+                var botMove = _history.Redo();
+                if (botMove != null) ApplyRedoToUI(botMove);
+            }
+            _gameEngine.SetBoard(GetCurrentBoardFromUI());
+            RefreshUndoRedoButtons();
+        }
+
+        private void ApplyUndoToUI(MoveSnapshot snapshot)
+        {
+            string btnName = $"btn{snapshot.Row}{snapshot.Col}";
+            var btn = (Button)this.Controls.Find(btnName, true).FirstOrDefault();
+            if (btn != null) { btn.Text = ""; btn.Enabled = true; btn.BackColor = Color.White; }
+        }
+
+        private void ApplyRedoToUI(MoveSnapshot snapshot)
+        {
+            string btnName = $"btn{snapshot.Row}{snapshot.Col}";
+            var btn = (Button)this.Controls.Find(btnName, true).FirstOrDefault();
+            if (btn != null) { btn.Text = snapshot.Symbol.ToString(); btn.Enabled = false; }
+        }
+
+        private void RefreshUndoRedoButtons()
+        {
+            if (btnUndo != null) btnUndo.Enabled = _history.CanUndo;
+            if (btnRedo != null) btnRedo.Enabled = _history.CanRedo;
+        }
+
+        private char[,] GetCurrentBoardFromUI()
+        {
+            char[,] board = new char[3, 3];
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    string btnName = $"btn{i}{j}";
+                    var btn = (Button)this.Controls.Find(btnName, true).FirstOrDefault();
+                    board[i, j] = string.IsNullOrEmpty(btn?.Text) ? '\0' : btn.Text[0];
+                }
+            }
+            return board;
         }
 
         private void UpdateStatusLabel()
         {
-           
-            lblTournamentInfo.Text = $"Раунд: {_tournamentManager.CurrentRound} | Бали: {_tournamentManager.TotalScore}";
-
-            this.Text = $"Гравець: {_playerName} | Раунд: {_tournamentManager.CurrentRound}";
-
-          
+            lblTournamentInfo.Text = $"{GetRoundTitle()} | Бали: {_tournamentManager.TotalScore}";
             int progress = (_tournamentManager.CurrentRound - 1) * 33;
-            if (!_tournamentManager.IsTournamentActive && _tournamentManager.TotalScore > 0) progress = 100;
-
             pbProgress.Value = Math.Min(progress, 100);
-
-            _logger.LogInfo($"Оновлено UI. Поточний прогрес турніру: {progress}%");
         }
 
-        private async void HighlightStatus(Color highlightColor)
+        private string GetRoundTitle() => _tournamentManager.CurrentRound switch { 1 => "РАУНД 1", 2 => "РАУНД 2", 3 => "ФІНАЛ", _ => "ГРА" };
+
+        private void PrepareNextRound()
         {
-            try
-            {
-                Color originalColor = lblTournamentInfo.ForeColor;
-                lblTournamentInfo.ForeColor = highlightColor;
+            _gameEngine.ResetBoard();
+            _history.Clear();
+            foreach (Control c in this.Controls) if (c is Button b && b.Name.StartsWith("btn")) { b.Text = ""; b.Enabled = true; b.BackColor = Color.White; }
+        }
 
-                _logger.LogInfo($"Візуальний ефект: зміна кольору на {highlightColor.Name}");
+        private bool IsBoardFull() => _gameEngine.GetBoard().Cast<char>().All(c => c != '\0');
 
-                await Task.Delay(1500);
+        private async void HighlightStatus(Color c) { lblTournamentInfo.ForeColor = c; await Task.Delay(1000); lblTournamentInfo.ForeColor = Color.Black; }
 
-                
-                if (!lblTournamentInfo.IsDisposed)
-                {
-                    lblTournamentInfo.ForeColor = originalColor;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Помилка при виконанні ефекту підсвічування", ex);
-            }
+        private async Task FlashGameBoard(Color c)
+        {
+            var btns = this.Controls.OfType<Button>().Where(b => b.Name.StartsWith("btn")).ToList();
+            foreach (var b in btns) b.BackColor = c;
+            await Task.Delay(500);
+            foreach (var b in btns) b.BackColor = Color.White;
         }
     }
 }

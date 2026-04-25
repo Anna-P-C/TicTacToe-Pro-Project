@@ -19,7 +19,7 @@ namespace TicTacToe.UI.Services
             WriteToFile($"[INFO] [{DateTime.Now}] {message}");
         }
 
-        public void LogError(string message, Exception? ex = null)
+        public void LogError(string message, Exception ex = null)
         {
             string errorText = $"[ERROR] [{DateTime.Now}] {message}";
             if (ex != null) errorText += $" | Exception: {ex.Message}";

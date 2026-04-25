@@ -10,7 +10,7 @@ namespace TicTacToe.UI.Services
     
     public class ScoreService
     {
-        private static ScoreService? _instance;
+        private static ScoreService _instance;
         private static readonly object _lock = new object();
         private readonly string _filePath = "scores.json";
 

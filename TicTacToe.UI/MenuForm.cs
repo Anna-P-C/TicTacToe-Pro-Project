@@ -13,12 +13,12 @@ namespace TicTacToe.UI
         public MenuForm()
         {
             InitializeComponent();
-            LoadTopPlayers(); 
+            LoadTopPlayers();
         }
 
         private void LoadTopPlayers()
         {
-           
+
             var topPlayers = _scoreService.GetPlayers()
                 .OrderByDescending(p => p.Score)
                 .Take(5)
@@ -32,7 +32,7 @@ namespace TicTacToe.UI
         {
             string playerName = txtName.Text.Trim();
 
-            
+
             if (string.IsNullOrWhiteSpace(playerName))
             {
                 MessageBox.Show("Будь ласка, введіть своє ім'я перед початком гри!", "Увага", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -45,14 +45,19 @@ namespace TicTacToe.UI
                 return;
             }
 
-            
+
             var gameForm = new Form1(playerName);
-            this.Hide(); 
+            this.Hide();
             gameForm.ShowDialog();
 
-            
+
             this.Show();
             LoadTopPlayers();
+        }
+
+        private void MenuForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

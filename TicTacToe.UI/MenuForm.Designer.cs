@@ -92,6 +92,7 @@
             Controls.Add(lblTitle);
             Name = "MenuForm";
             Text = "MenuForm";
+            Load += MenuForm_Load;
             ((System.ComponentModel.ISupportInitialize)dgvLeaderboard).EndInit();
             ResumeLayout(false);
             PerformLayout();

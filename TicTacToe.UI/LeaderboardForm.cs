@@ -40,7 +40,7 @@ namespace TicTacToe.UI
                 rank++;
             }
 
-            // Додаємо список на форму 
+           
             this.Controls.Add(listBox);
             this.Text = "Рейтинг найкращих гравців";
             this.Size = new Size(300, 400);

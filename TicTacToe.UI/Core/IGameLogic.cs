@@ -4,8 +4,9 @@
     {
         bool MakeMove(int row, int col, char symbol);
         char CheckWinner();
-        void ResetBoard();
-        char[,] GetBoardState();
         char[,] GetBoard();
+        char[,] GetBoardState(); 
+        void ResetBoard();
+        void SetBoard(char[,] board);
     }
 }

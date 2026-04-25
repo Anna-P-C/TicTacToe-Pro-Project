@@ -42,6 +42,8 @@ namespace TicTacToe.UI
             btn12 = new Button();
             lblTournamentInfo = new Label();
             pbProgress = new ProgressBar();
+            btnUndo = new Button();
+            btnRedo = new Button();
             SuspendLayout();
             // 
             // btn00
@@ -135,16 +137,38 @@ namespace TicTacToe.UI
             // 
             // pbProgress
             // 
-            pbProgress.Location = new Point(568, 141);
+            pbProgress.Location = new Point(537, 122);
             pbProgress.Name = "pbProgress";
             pbProgress.Size = new Size(125, 29);
             pbProgress.TabIndex = 10;
+            // 
+            // btnUndo
+            // 
+            btnUndo.Location = new Point(83, 466);
+            btnUndo.Name = "btnUndo";
+            btnUndo.Size = new Size(128, 29);
+            btnUndo.TabIndex = 11;
+            btnUndo.Text = "Відмінити хід";
+            btnUndo.UseVisualStyleBackColor = true;
+            btnUndo.Click += btnUndo_Click_1;
+            // 
+            // btnRedo
+            // 
+            btnRedo.Location = new Point(370, 466);
+            btnRedo.Name = "btnRedo";
+            btnRedo.Size = new Size(119, 29);
+            btnRedo.TabIndex = 12;
+            btnRedo.Text = "Повернути хід";
+            btnRedo.UseVisualStyleBackColor = true;
+            btnRedo.Click += btnRedo_Click;
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(707, 532);
+            Controls.Add(btnRedo);
+            Controls.Add(btnUndo);
             Controls.Add(pbProgress);
             Controls.Add(lblTournamentInfo);
             Controls.Add(btn12);
@@ -176,5 +200,7 @@ namespace TicTacToe.UI
         private Button btn12;
         private Label lblTournamentInfo;
         private ProgressBar pbProgress;
+        private Button btnUndo;
+        private Button btnRedo;
     }
 }
