@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -33,22 +33,22 @@ namespace TicTacToe.UI
 
             _gameEngine = new GameEngine();
             _player1 = new Player(_playerName, 'X');
-            _player2 = new Player(" ÓÏÔ'˛ÚÂ", 'O');
+            _player2 = new Player("–ö–æ–º–ø'—é—Ç–µ—Ä", 'O');
             _currentPlayer = _player1;
 
             _botStrategy = StrategyFactory.CreateStrategy(1);
 
-            // —“¿–“ ¿Õ¿À≤“» »: œÓ˜ËÌ‡∫ÏÓ ‚≥‰Î≥Í ˜‡ÒÛ „Ë
+           
             AnalyticsService.Instance.StartRoundTimer();
 
             UpdateStatusLabel();
             RefreshUndoRedoButtons();
         }
 
-        // ÷ÂÈ ÏÂÚÓ‰ ‚ËÔ‡‚Îˇ∫ ÔÓÏËÎÍÛ CS0103 Û Designer.cs
+      
         private void Form1_Load(object sender, EventArgs e)
         {
-            _logger.LogInfo("‘ÓÏ‡ „Ë ÛÒÔ≥¯ÌÓ Á‡‚‡ÌÚ‡ÊÂÌ‡.");
+            _logger.LogInfo("–§–æ—Ä–º–∞ –≥—Ä–∏ —É—Å–ø—ñ—à–Ω–æ –∑–∞–≤–∞–Ω—Ç–∞–∂–µ–Ω–∞.");
         }
 
         private void OnButtonClick(object sender, EventArgs e)
@@ -73,7 +73,7 @@ namespace TicTacToe.UI
             {
                 _history.PushMove(_gameEngine.GetBoard(), row, col, _currentPlayer.Symbol);
 
-                // –≈™—“–”™ÃŒ ’≤ƒ ¬ ¿Õ¿À≤“»÷≤
+           
                 AnalyticsService.Instance.RegisterMove();
 
                 if (_currentPlayer == _player1) _movesCounter++;
@@ -117,7 +117,7 @@ namespace TicTacToe.UI
                     HandleMove(botButton);
                 }
             }
-            catch (Exception ex) { _logger.LogError("¡ÓÚ ÔÓÏËÎË‚Òˇ", ex); }
+            catch (Exception ex) { _logger.LogError("–ë–æ—Ç –ø–æ–º–∏–ª–∏–≤—Å—è", ex); }
         }
 
         private async Task EndGame(char winner)
@@ -135,29 +135,52 @@ namespace TicTacToe.UI
                 await FlashGameBoard(Color.Tomato);
             }
 
-            // «¡≈–≤√¿™ÃŒ ƒ¿Õ≤ ¿Õ¿À≤“» » “¿ √≈Õ≈–”™ÃŒ «¬≤“
+          
             AnalyticsService.Instance.SaveSession(_playerName, _tournamentManager.TotalScore / 100, 0, _movesCounter);
             string advice = AnalyticsService.Instance.GetPerformanceAdvice(_tournamentManager.TotalScore / 100, 0);
 
             _movesCounter = 0;
             _history.Clear();
+
+      
             _tournamentManager.RegisterWin(winner);
             UpdateStatusLabel();
 
-            if (_tournamentManager.IsTournamentActive && winner == 'X')
+            string roundResultMessage = winner switch
             {
-                MessageBox.Show($"{GetRoundTitle()} ÔÓÈ‰ÂÌÓ!\n\nœÓ‡‰‡: {advice}");
+                'X' => "–í–∏ –ø–µ—Ä–µ–º–æ–≥–ª–∏ –≤ —Ü—å–æ–º—É —Ä–∞—É–Ω–¥—ñ! üèÜ",
+                'O' => "–ë–æ—Ç –≤–∏—è–≤–∏–≤—Å—è —Å–∏–ª—å–Ω—ñ—à–∏–º —É —Ü—å–æ–º—É —Ä–∞—É–Ω–¥—ñ. ü§ñ",
+                _ => "–ù—ñ—á–∏—è! –û—á–∫–∏ –Ω–µ –Ω–∞—Ä–∞—Ö–æ–≤–∞–Ω–æ. ü§ù"
+            };
+
+            if (_tournamentManager.IsTournamentActive)
+            {
+                MessageBox.Show($"{roundResultMessage}\n–ì–æ—Ç—É–π—Ç–µ—Å—è –¥–æ —Ä–∞—É–Ω–¥—É {_tournamentManager.CurrentRound}!");
                 PrepareNextRound();
-                AnalyticsService.Instance.StartRoundTimer(); // —ÍË‰‡∫ÏÓ Ú‡ÈÏÂ ‰Îˇ ÌÓ‚Ó„Ó ‡ÛÌ‰Û
+                AnalyticsService.Instance.StartRoundTimer();
             }
             else
             {
-                MessageBox.Show($"√‡ Á‡‚Â¯ÂÌ‡!\n\n{advice}");
+                
+                string finalStatus = _tournamentManager.TotalScore > 500 ? "–ö—Ä—É—Ç–∏–π —Ä–µ–∑—É–ª—å—Ç–∞—Ç!" : "–ú–æ–∂–Ω–∞ –±—É–ª–æ –± —ñ –∫—Ä–∞—â–µ.";
+
+                string fullStats = $"üèÅ –¢–£–†–ù–Ü–† –ó–ê–í–ï–†–®–ï–ù–û!\n" +
+                                   $"‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ\n" +
+                                   $"{roundResultMessage}\n\n" +
+                                   $"üìä –°–¢–ê–¢–ò–°–¢–ò–ö–ê –Ü–ì–û–†:\n" +
+                                   $"‚úÖ –¢–≤–æ—ó –ø–µ—Ä–µ–º–æ–≥–∏: {_tournamentManager.PlayerWins}\n" +
+                                   $"‚ùå –ü–µ—Ä–µ–º–æ–≥–∏ –±–æ—Ç–∞: {_tournamentManager.BotWins}\n" +
+                                   $"ü§ù –ù—ñ—á–∏—ó: {_tournamentManager.Draws}\n\n" +
+                                   $"üèÜ –§—ñ–Ω–∞–ª—å–Ω–∏–π —Ä–∞—Ö—É–Ω–æ–∫: {_tournamentManager.TotalScore}\n" +
+                                   $"üìù –ü–æ—Ä–∞–¥–∞: {advice}\n" +
+                                   $"‚ú® {finalStatus}";
+
+                MessageBox.Show(fullStats, "–§–Ü–ù–ê–õ –¢–£–†–ù–Ü–†–£");
+
                 ScoreService.Instance.SaveScore(new Player(_playerName, 'X'), _tournamentManager.TotalScore);
                 this.Close();
             }
         }
-
         private void btnUndo_Click_1(object sender, EventArgs e)
         {
             try
@@ -225,12 +248,24 @@ namespace TicTacToe.UI
 
         private void UpdateStatusLabel()
         {
-            lblTournamentInfo.Text = $"{GetRoundTitle()} | ¡‡ÎË: {_tournamentManager.TotalScore}";
-            int progress = (_tournamentManager.CurrentRound - 1) * 33;
-            pbProgress.Value = Math.Min(progress, 100);
+     
+            lblTournamentInfo.Text = $"{GetRoundTitle()} | –ë–∞–ª–∏: {_tournamentManager.TotalScore}";
+
+        
+            this.Text = $"TicTacToe - {_playerName} - {GetRoundTitle()}";
+
+            
+            int progressValue = (_tournamentManager.CurrentRound - 1) * 33;
+
+            if (!_tournamentManager.IsTournamentActive && _tournamentManager.TotalScore > 0)
+            {
+                progressValue = 100;
+            }
+
+            pbProgress.Value = Math.Min(progressValue, 100);
         }
 
-        private string GetRoundTitle() => _tournamentManager.CurrentRound switch { 1 => "–¿”Õƒ 1", 2 => "–¿”Õƒ 2", 3 => "‘≤Õ¿À", _ => "√–¿" };
+        private string GetRoundTitle() => _tournamentManager.CurrentRound switch { 1 => "–†–ê–£–ù–î 1", 2 => "–†–ê–£–ù–î 2", 3 => "–§–Ü–ù–ê–õ", _ => "–ì–†–ê" };
 
         private void PrepareNextRound()
         {
