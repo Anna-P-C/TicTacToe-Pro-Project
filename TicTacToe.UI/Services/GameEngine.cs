@@ -4,11 +4,23 @@ namespace TicTacToe.UI.Services
 {
     public class GameEngine : IGameLogic
     {
-        private char[,] _board = new char[3, 3];
+        private char[,] _board;
+        private int _size;
+
+        public GameEngine()
+        {
+            InitializeNewBoard(3);
+        }
+
+        public void InitializeNewBoard(int size)
+        {
+            _size = size;
+            _board = new char[size, size];
+        }
 
         public bool MakeMove(int row, int col, char symbol)
         {
-            if (_board[row, col] == '\0')
+            if (row >= 0 && row < _size && col >= 0 && col < _size && _board[row, col] == '\0')
             {
                 _board[row, col] = symbol;
                 return true;
@@ -18,36 +30,48 @@ namespace TicTacToe.UI.Services
 
         public char CheckWinner()
         {
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < _size; i++)
             {
-                if (_board[i, 0] != '\0' && _board[i, 0] == _board[i, 1] && _board[i, 1] == _board[i, 2]) return _board[i, 0];
-                if (_board[0, i] != '\0' && _board[0, i] == _board[1, i] && _board[1, i] == _board[2, i]) return _board[0, i];
+                if (CheckLine(i, 0, 0, 1)) return _board[i, 0];
+                if (CheckLine(0, i, 1, 0)) return _board[0, i];
             }
 
-            if (_board[0, 0] != '\0' && _board[0, 0] == _board[1, 1] && _board[1, 1] == _board[2, 2]) return _board[0, 0];
-            if (_board[0, 2] != '\0' && _board[0, 2] == _board[1, 1] && _board[1, 1] == _board[2, 0]) return _board[0, 2];
+            if (CheckLine(0, 0, 1, 1)) return _board[0, 0];
+            if (CheckLine(0, _size - 1, 1, -1)) return _board[0, _size - 1];
 
             return '\0';
         }
 
-        public void ResetBoard() => _board = new char[3, 3];
-
-        public char[,] GetBoard()
+        private bool CheckLine(int startRow, int startCol, int dRow, int dCol)
         {
-            return _board;
+            char first = _board[startRow, startCol];
+            if (first == '\0') return false;
+
+            for (int i = 1; i < _size; i++)
+            {
+                if (_board[startRow + i * dRow, startCol + i * dCol] != first)
+                    return false;
+            }
+            return true;
         }
 
-     
-        public char[,] GetBoardState()
+        public void ResetBoard()
         {
-            return _board;
+            _board = new char[_size, _size];
         }
+
+        public char[,] GetBoard() => _board;
+
+        public char[,] GetBoardState() => _board;
 
         public void SetBoard(char[,] board)
         {
-            for (int i = 0; i < 3; i++)
+            int inputSize = board.GetLength(0);
+            if (inputSize != _size) InitializeNewBoard(inputSize);
+
+            for (int i = 0; i < _size; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < _size; j++)
                 {
                     _board[i, j] = board[i, j];
                 }

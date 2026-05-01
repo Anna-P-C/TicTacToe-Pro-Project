@@ -38,14 +38,16 @@ namespace TicTacToe.UI
 
             _botStrategy = StrategyFactory.CreateStrategy(1);
 
-           
             AnalyticsService.Instance.StartRoundTimer();
+
+            int initialSize = _tournamentManager.GetCurrentBoardSize();
+            _gameEngine.InitializeNewBoard(initialSize);
+            GenerateDynamicBoard(initialSize);
 
             UpdateStatusLabel();
             RefreshUndoRedoButtons();
         }
 
-      
         private void Form1_Load(object sender, EventArgs e)
         {
             _logger.LogInfo("Форма гри успішно завантажена.");
@@ -72,8 +74,6 @@ namespace TicTacToe.UI
             if (_gameEngine.MakeMove(row, col, _currentPlayer.Symbol))
             {
                 _history.PushMove(_gameEngine.GetBoard(), row, col, _currentPlayer.Symbol);
-
-           
                 AnalyticsService.Instance.RegisterMove();
 
                 if (_currentPlayer == _player1) _movesCounter++;
@@ -135,14 +135,11 @@ namespace TicTacToe.UI
                 await FlashGameBoard(Color.Tomato);
             }
 
-          
             AnalyticsService.Instance.SaveSession(_playerName, _tournamentManager.TotalScore / 100, 0, _movesCounter);
             string advice = AnalyticsService.Instance.GetPerformanceAdvice(_tournamentManager.TotalScore / 100, 0);
 
             _movesCounter = 0;
             _history.Clear();
-
-      
             _tournamentManager.RegisterWin(winner);
             UpdateStatusLabel();
 
@@ -161,7 +158,6 @@ namespace TicTacToe.UI
             }
             else
             {
-                
                 string finalStatus = _tournamentManager.TotalScore > 500 ? "Крутий результат!" : "Можна було б і краще.";
 
                 string fullStats = $"🏁 ТУРНІР ЗАВЕРШЕНО!\n" +
@@ -172,15 +168,53 @@ namespace TicTacToe.UI
                                    $"❌ Перемоги бота: {_tournamentManager.BotWins}\n" +
                                    $"🤝 Нічиї: {_tournamentManager.Draws}\n\n" +
                                    $"🏆 Фінальний рахунок: {_tournamentManager.TotalScore}\n" +
-                                   $"📝 Порада: {advice}\n" +
                                    $"✨ {finalStatus}";
 
                 MessageBox.Show(fullStats, "ФІНАЛ ТУРНІРУ");
-
                 ScoreService.Instance.SaveScore(new Player(_playerName, 'X'), _tournamentManager.TotalScore);
                 this.Close();
             }
         }
+
+        private void GenerateDynamicBoard(int size)
+        {
+            var oldButtons = this.Controls.OfType<Button>().Where(b => b.Name.StartsWith("btn")).ToList();
+            foreach (var btn in oldButtons) this.Controls.Remove(btn);
+
+            int btnSize = 60;
+            int startX = (this.Width - (size * btnSize)) / 2;
+            int startY = 100;
+
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    Button b = new Button
+                    {
+                        Name = $"btn{i}{j}",
+                        Size = new Size(btnSize, btnSize),
+                        Location = new Point(startX + j * btnSize, startY + i * btnSize),
+                        Font = new Font("Arial", 14, FontStyle.Bold),
+                        BackColor = Color.White
+                    };
+                    b.Click += OnButtonClick;
+                    this.Controls.Add(b);
+                }
+            }
+        }
+
+        private void PrepareNextRound()
+        {
+            _gameEngine.ResetBoard();
+            _history.Clear();
+            _currentPlayer = _player1;
+
+            int size = _tournamentManager.GetCurrentBoardSize();
+            _gameEngine.InitializeNewBoard(size);
+            GenerateDynamicBoard(size);
+            UpdateStatusLabel();
+        }
+
         private void btnUndo_Click_1(object sender, EventArgs e)
         {
             try
@@ -233,10 +267,11 @@ namespace TicTacToe.UI
 
         private char[,] GetCurrentBoardFromUI()
         {
-            char[,] board = new char[3, 3];
-            for (int i = 0; i < 3; i++)
+            int size = _tournamentManager.GetCurrentBoardSize();
+            char[,] board = new char[size, size];
+            for (int i = 0; i < size; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < size; j++)
                 {
                     string btnName = $"btn{i}{j}";
                     var btn = (Button)this.Controls.Find(btnName, true).FirstOrDefault();
@@ -248,42 +283,24 @@ namespace TicTacToe.UI
 
         private void UpdateStatusLabel()
         {
-     
-            lblTournamentInfo.Text = $"{GetRoundTitle()} | Бали: {_tournamentManager.TotalScore}";
+            if (lblPlayerScore != null) lblPlayerScore.Text = $"Гравець: {_tournamentManager.PlayerScore}";
+            if (lblBotScore != null) lblBotScore.Text = $"Бот: {_tournamentManager.BotScore}";
 
-        
+            lblTournamentInfo.Text = $"{GetRoundTitle()} | Бали: {_tournamentManager.TotalScore}";
             this.Text = $"TicTacToe - {_playerName} - {GetRoundTitle()}";
 
-            
             int progressValue = (_tournamentManager.CurrentRound - 1) * 33;
-
-            if (!_tournamentManager.IsTournamentActive && _tournamentManager.TotalScore > 0)
-            {
-                progressValue = 100;
-            }
-
+            if (!_tournamentManager.IsTournamentActive && _tournamentManager.TotalScore > 0) progressValue = 100;
             pbProgress.Value = Math.Min(progressValue, 100);
         }
 
         private string GetRoundTitle() => _tournamentManager.CurrentRound switch { 1 => "РАУНД 1", 2 => "РАУНД 2", 3 => "ФІНАЛ", _ => "ГРА" };
-
-        private void PrepareNextRound()
-        {
-            _gameEngine.ResetBoard();
-            _history.Clear();
-            foreach (Control c in this.Controls) if (c is Button b && b.Name.StartsWith("btn")) { b.Text = ""; b.Enabled = true; b.BackColor = Color.White; }
-        }
-
         private bool IsBoardFull() => _gameEngine.GetBoard().Cast<char>().All(c => c != '\0');
-
         private async void HighlightStatus(Color c) { lblTournamentInfo.ForeColor = c; await Task.Delay(1000); lblTournamentInfo.ForeColor = Color.Black; }
-
         private async Task FlashGameBoard(Color c)
         {
             var btns = this.Controls.OfType<Button>().Where(b => b.Name.StartsWith("btn")).ToList();
-            foreach (var b in btns) b.BackColor = c;
-            await Task.Delay(500);
-            foreach (var b in btns) b.BackColor = Color.White;
+            foreach (var b in btns) { b.BackColor = c; b.Enabled = false; }
         }
     }
 }

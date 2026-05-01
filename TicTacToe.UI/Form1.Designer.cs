@@ -44,6 +44,8 @@ namespace TicTacToe.UI
             pbProgress = new ProgressBar();
             btnUndo = new Button();
             btnRedo = new Button();
+            lblPlayerScore = new Label();
+            lblBotScore = new Label();
             SuspendLayout();
             // 
             // btn00
@@ -137,7 +139,7 @@ namespace TicTacToe.UI
             // 
             // pbProgress
             // 
-            pbProgress.Location = new Point(537, 122);
+            pbProgress.Location = new Point(549, 43);
             pbProgress.Name = "pbProgress";
             pbProgress.Size = new Size(125, 29);
             pbProgress.TabIndex = 10;
@@ -162,11 +164,29 @@ namespace TicTacToe.UI
             btnRedo.UseVisualStyleBackColor = true;
             btnRedo.Click += btnRedo_Click;
             // 
+            // lblPlayerScore
+            // 
+            lblPlayerScore.AutoSize = true;
+            lblPlayerScore.Location = new Point(547, 199);
+            lblPlayerScore.Name = "lblPlayerScore";
+            lblPlayerScore.Size = new Size(0, 20);
+            lblPlayerScore.TabIndex = 13;
+            // 
+            // lblBotScore
+            // 
+            lblBotScore.AutoSize = true;
+            lblBotScore.Location = new Point(549, 243);
+            lblBotScore.Name = "lblBotScore";
+            lblBotScore.Size = new Size(0, 20);
+            lblBotScore.TabIndex = 14;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(707, 532);
+            Controls.Add(lblBotScore);
+            Controls.Add(lblPlayerScore);
             Controls.Add(btnRedo);
             Controls.Add(btnUndo);
             Controls.Add(pbProgress);
@@ -202,5 +222,7 @@ namespace TicTacToe.UI
         private ProgressBar pbProgress;
         private Button btnUndo;
         private Button btnRedo;
+        private Label lblPlayerScore;
+        private Label lblBotScore;
     }
 }

@@ -8,5 +8,6 @@
         char[,] GetBoardState(); 
         void ResetBoard();
         void SetBoard(char[,] board);
+        void InitializeNewBoard(int size);
     }
 }
