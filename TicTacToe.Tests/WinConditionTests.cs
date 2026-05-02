@@ -5,7 +5,6 @@ namespace TicTacToe.Tests
 {
     public class WinConditionTests
     {
-        
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -20,7 +19,6 @@ namespace TicTacToe.Tests
             Assert.Equal('X', engine.CheckWinner());
         }
 
-        // Перевірка вертикалей на 5х5
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -33,6 +31,43 @@ namespace TicTacToe.Tests
             engine.InitializeNewBoard(5);
             for (int row = 0; row < 5; row++) engine.MakeMove(row, col, 'O');
             Assert.Equal('O', engine.CheckWinner());
+        }
+
+        [Fact]
+        public void CheckWinner_5x5_MainDiagonalWin_ReturnsX()
+        {
+            var engine = new GameEngine();
+            engine.InitializeNewBoard(5);
+            for (int i = 0; i < 5; i++) engine.MakeMove(i, i, 'X');
+            Assert.Equal('X', engine.CheckWinner());
+        }
+
+        [Fact]
+        public void CheckWinner_5x5_ReverseDiagonalWin_ReturnsO()
+        {
+            var engine = new GameEngine();
+            engine.InitializeNewBoard(5);
+            for (int i = 0; i < 5; i++) engine.MakeMove(i, 4 - i, 'O');
+            Assert.Equal('O', engine.CheckWinner());
+        }
+        [Fact]
+        public void CheckWinner_3x3_DiagonalWin_ReturnsX()
+        {
+            var engine = new GameEngine();
+            engine.InitializeNewBoard(3);
+            engine.MakeMove(0, 0, 'X');
+            engine.MakeMove(1, 1, 'X');
+            engine.MakeMove(2, 2, 'X');
+            Assert.Equal('X', engine.CheckWinner());
+        }
+
+        [Fact]
+        public void GameEngine_MovesCount_ShouldIncrease()
+        {
+            var engine = new GameEngine();
+            engine.InitializeNewBoard(3);
+            engine.MakeMove(0, 0, 'X');
+           
         }
     }
 }
