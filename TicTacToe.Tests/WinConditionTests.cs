@@ -1,6 +1,8 @@
 ﻿using Xunit;
 using TicTacToe.UI.Services;
 
+using Assert = Xunit.Assert;
+
 namespace TicTacToe.Tests
 {
     public class WinConditionTests
@@ -50,6 +52,7 @@ namespace TicTacToe.Tests
             for (int i = 0; i < 5; i++) engine.MakeMove(i, 4 - i, 'O');
             Assert.Equal('O', engine.CheckWinner());
         }
+
         [Fact]
         public void CheckWinner_3x3_DiagonalWin_ReturnsX()
         {
@@ -62,12 +65,23 @@ namespace TicTacToe.Tests
         }
 
         [Fact]
-        public void GameEngine_MovesCount_ShouldIncrease()
+        public void GameEngine_MovesCount_ShouldIncrease_Detailed()
         {
             var engine = new GameEngine();
             engine.InitializeNewBoard(3);
+
+          
+            Assert.NotNull(engine.GetBoard());
+
+          
             engine.MakeMove(0, 0, 'X');
+            engine.MakeMove(1, 1, 'O');
+
            
+            var board = engine.GetBoard();
+            Assert.Equal('X', board[0, 0]);
+            Assert.Equal('O', board[1, 1]);
+            Assert.Equal('\0', board[2, 2]);
         }
     }
 }

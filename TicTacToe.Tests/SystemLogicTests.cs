@@ -2,6 +2,9 @@
 using TicTacToe.UI.Core;
 using TicTacToe.UI.Services;
 
+
+using Assert = Xunit.Assert;
+
 namespace TicTacToe.Tests
 {
     public class SystemLogicTests
@@ -11,10 +14,10 @@ namespace TicTacToe.Tests
         {
             var manager = AchievementManager.Instance;
 
-            
             var unlocked = manager.GetUnlockedAchievements();
 
-           
+            
+
             Assert.NotNull(unlocked);
         }
 
@@ -41,7 +44,27 @@ namespace TicTacToe.Tests
         {
             var instance1 = ScoreService.Instance;
             var instance2 = ScoreService.Instance;
+
+            
+
             Assert.Same(instance1, instance2);
+        }
+
+        [Fact]
+        public void System_State_Detailed_Verification()
+        {
+            
+
+            var scoreService = ScoreService.Instance;
+            Assert.NotNull(scoreService);
+
+
+            var players = scoreService.GetPlayers();
+            Assert.NotNull(players);
+
+
+            bool isServiceReady = scoreService != null;
+            Assert.True(isServiceReady);
         }
     }
 }

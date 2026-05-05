@@ -1,5 +1,7 @@
 ﻿using Xunit;
 using TicTacToe.UI.Services;
+// Явно вказуємо Assert від xUnit, щоб методи Equal працювали
+using Assert = Xunit.Assert;
 
 namespace TicTacToe.Tests
 {
@@ -13,6 +15,8 @@ namespace TicTacToe.Tests
             engine.MakeMove(0, 0, 'X'); engine.MakeMove(0, 1, 'X');
             engine.MakeMove(0, 2, 'X'); engine.MakeMove(0, 3, 'X');
             engine.MakeMove(0, 4, 'X');
+
+            // Тепер метод Equal буде знайдено
             Assert.Equal('X', engine.CheckWinner());
         }
 
